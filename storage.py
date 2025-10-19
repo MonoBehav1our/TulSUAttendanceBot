@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class StorageManager:
-    DB_FILE = Path('db.sqlite3')
+    # Определяем путь к базе данных
+    # Для Windows Docker можно использовать локальную базу в контейнере
+    if os.getenv('USE_LOCAL_DB', 'false').lower() == 'true':
+        DB_FILE = Path('/app/db.sqlite3')  # Локальная база в контейнере
+    else:
+        DB_FILE = Path('db.sqlite3')  # Стандартный путь (работает с volume)
 
     def __init__(self):
         self.conn: aiosqlite.Connection | None = None

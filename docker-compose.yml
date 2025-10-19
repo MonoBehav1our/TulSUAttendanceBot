@@ -24,11 +24,17 @@ services:
       - INCLUDE_EXAMS=${INCLUDE_EXAMS:-false}
       - NMG_TYPES=${NMG_TYPES:-practice,lab}
 
+      # Для Windows - использовать локальную базу в контейнере (true/false)
+      - USE_LOCAL_DB=${USE_LOCAL_DB:-false}
+
     volumes:
-      # Монтируем базу данных для сохранения данных между перезапусками
-      - ./db.sqlite3:/app/db.sqlite3
+      # Используем named volume для базы данных (кросс-платформенно)
+      - tulsu_bot_db:/app/db.sqlite3
       # Монтируем директорию для логов (если понадобится)
       - ./logs:/app/logs
+
+volumes:
+  tulsu_bot_db:
 
     # Опционально: healthcheck
     healthcheck:
