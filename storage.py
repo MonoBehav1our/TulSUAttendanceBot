@@ -85,6 +85,14 @@ class StorageManager:
             );
         ''')
 
+        await self.conn.execute('''
+            CREATE TABLE IF NOT EXISTS banned_emojis (
+                emoji       TEXT PRIMARY KEY,
+                added_by    TEXT NOT NULL,
+                added_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        ''')
+
         await self.conn.commit()
 
     # ----- User data -----
@@ -390,6 +398,40 @@ class StorageManager:
             return json.loads(row['raw_json'])
         except json.JSONDecodeError:
             return []
+
+    # ----- Banned emojis -----
+    async def get_banned_emojis(self) -> list[str]:
+        assert self.conn
+
+        query = 'SELECT emoji FROM banned_emojis ORDER BY added_at DESC'
+        async with self.conn.execute(query) as cursor:
+            rows = await cursor.fetchall()
+
+        return [row['emoji'] for row in rows]
+
+    async def add_banned_emoji(self, emoji: str, added_by: str) -> bool:
+        assert self.conn
+
+        try:
+            await self.conn.execute(
+                'INSERT INTO banned_emojis (emoji, added_by) VALUES (?, ?)',
+                (emoji, added_by)
+            )
+            await self.conn.commit()
+            return True
+        except aiosqlite.IntegrityError:
+            # Emoji already exists
+            return False
+
+    async def remove_banned_emoji(self, emoji: str) -> bool:
+        assert self.conn
+
+        result = await self.conn.execute(
+            'DELETE FROM banned_emojis WHERE emoji = ?',
+            (emoji,)
+        )
+        await self.conn.commit()
+        return result.rowcount > 0
 
     async def close(self):
         if self.conn:
