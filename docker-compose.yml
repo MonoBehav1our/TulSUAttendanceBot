@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  tulsu-attendance-bot:
+    build: .
+    container_name: tulsu-attendance-bot
+    restart: unless-stopped
+    environment:
+      # Основные настройки бота
+      - TOKEN=${TOKEN}
+      - CHAT_ID=${CHAT_ID}
+      - GROUP_ID=${GROUP_ID}
+      - ADMIN_COMMANDS_ACCESS=${ADMIN_COMMANDS_ACCESS}
+
+      # Режим работы
+      - TEST_MODE=${TEST_MODE:-false}
+
+      # Тайминги (в секундах)
+      - POLL_CHECK_INTERVAL=${POLL_CHECK_INTERVAL:-60}
+      - POLL_CLOSURE_WINDOW=${POLL_CLOSURE_WINDOW:-300}
+      - SCHEDULE_PREFETCH_OFFSET=${SCHEDULE_PREFETCH_OFFSET:-300}
+
+      # Дополнительные настройки
+      - INCLUDE_EXAMS=${INCLUDE_EXAMS:-false}
+      - NMG_TYPES=${NMG_TYPES:-practice,lab}
+
+    volumes:
+      # Монтируем базу данных для сохранения данных между перезапусками
+      - ./db.sqlite3:/app/db.sqlite3
+      # Монтируем директорию для логов (если понадобится)
+      - ./logs:/app/logs
+
+    # Опционально: healthcheck
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    # Логи
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

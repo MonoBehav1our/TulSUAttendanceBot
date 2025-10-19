@@ -1,0 +1,20 @@
+# Конфигурация для Docker Compose
+# Скопируйте этот файл в .env и заполните значения
+
+# Основные настройки бота (ОБЯЗАТЕЛЬНО ЗАПОЛНИТЬ)
+TOKEN=your_bot_token_from_botfather
+CHAT_ID=your_telegram_group_id
+GROUP_ID=your_study_group_number
+ADMIN_COMMANDS_ACCESS=admin_user_id_1,admin_user_id_2
+
+# Режим работы
+TEST_MODE=false
+
+# Тайминги в секундах
+POLL_CHECK_INTERVAL=60
+POLL_CLOSURE_WINDOW=300
+SCHEDULE_PREFETCH_OFFSET=300
+
+# Дополнительные настройки
+INCLUDE_EXAMS=false
+NMG_TYPES=practice,lab
